@@ -1,4 +1,5 @@
 import pytest
+import logging
 from helpers import *
 from data import *
 
@@ -11,21 +12,28 @@ def unique_user_payload():
     payload["email"] = email
     return payload
 
-
 @pytest.fixture(scope="function")
 def registered_user(unique_user_payload):
-    """Создание пользователя перед тестом и его удаление после"""
-    """Создание пользователя"""
     create_response = create_user(unique_user_payload)
-    assert_response_status(create_response, 200, "Failed to create user")
-    """Авторизация пользователя"""
+    if create_response.status_code != 200:
+        pytest.fail(f"Создание пользователя failed: "f"статус {create_response.status_code}, ответ: {create_response.text}")
     login_response = login_user(unique_user_payload["email"], unique_user_payload["password"])
-    assert_response_status(login_response, 200, "Failed to login user")
-    access_token = login_response.json()["accessToken"]
-    refresh_token = login_response.json()["refreshToken"]
-    yield unique_user_payload, access_token, refresh_token
-    """Очистка: выход и удаление пользователя"""
-    logout_response = logout_user(refresh_token)
-    assert_response_status(logout_response, 200, "Failed to logout user")
-    delete_response = delete_user(access_token)
-    assert_response_status(delete_response, 200, "Failed to delete user")
+    if login_response.status_code != 200:
+        pytest.fail(f"Авторизация пользователя failed: "f"статус {login_response.status_code}, ответ: {login_response.text}")
+    access_token = login_response.json().get("accessToken")
+    refresh_token = login_response.json().get("refreshToken")
+    if not access_token:
+        pytest.fail("В ответе авторизации отсутствует accessToken")
+    if not refresh_token:
+        pytest.fail("В ответе авторизации отсутствует refreshToken")
+    try:
+        yield unique_user_payload, access_token, refresh_token
+    finally:
+        if refresh_token:
+            logout_response = logout_user(refresh_token)
+            if logout_response.status_code != 200:
+                logging.error(f"Logout failed: статус {logout_response.status_code}, "f"ответ: {logout_response.text}")
+        if access_token:
+            delete_response = delete_user(access_token)
+            if delete_response.status_code != 200:
+                logging.error(f"Delete failed: статус {delete_response.status_code}, "f"ответ: {delete_response.text}")
