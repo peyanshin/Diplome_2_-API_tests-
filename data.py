@@ -1,3 +1,5 @@
+# data.py
+
 VALID_USER_PAYLOAD = {
     "email": "test-user_{}_@yandex.ru",
     "password": "password123",
@@ -15,7 +17,6 @@ MISSING_FIELD_PAYLOAD = {
     "name": "MissingFieldUser"
 }
 
-
 VALID_LOGIN_PAYLOAD = {
     "email": "existing-user@yandex.ru",
     "password": "password"
@@ -25,7 +26,6 @@ INVALID_LOGIN_PAYLOAD = {
     "email": "nonexistent-user@yandex.ru",
     "password": "wrong-password"
 }
-
 
 ORDER_PAYLOAD_WITH_INGREDIENTS = {
     "ingredients": ["61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"]
@@ -39,15 +39,14 @@ ORDER_PAYLOAD_INVALID_HASH = {
     "ingredients": ["invalid_hash_123", "another_bad_hash"]
 }
 
-
 EXPECTED_STATUSES = {
     "success": 200,
     "user_exists": 403,
     "missing_fields": 403,
-    "unauthorized": 401, #статус 200 - API не требует авторизации для создания заказа??? БАГ???
+    "unauthorized": 401,  # статус 200 — API не требует авторизации для создания заказа??? БАГ???
     "not_found": 404,
-    "created": 201, #статус 200 - Спецификация API изменилась, и теперь создание заказа отвечает 200??? БАГ???
-    "bad_request": 400 #статус 500 - Сервер падает при обработке некорректных хешей ингредиентов??? БАГ???
+    "created": 201,  # статус 200 — Спецификация API изменилась, и теперь создание заказа отвечает 200??? БАГ???
+    "bad_request": 400  # статус 500 — Сервер падает при обработке некорректных хешей ингредиентов??? БАГ???
 }
 
 ERROR_MESSAGES = {
